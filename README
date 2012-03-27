@@ -1,0 +1,3 @@
+Output 48 unique shuffled cards, and then another 4 that represent half of a temporary bin.
+
+Use tcpserver (ipv4 or ipv6 edition) to host the stdout output.
