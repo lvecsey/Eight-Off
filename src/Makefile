@@ -16,7 +16,7 @@ viewcards : LIBS=-lrt
 
 viewcards : CFLAGS+=-I$(HOME)/eight-off/include
 
-viewcards : viewcards.o clientloop_destination.o headers.h.gch
+viewcards : viewcards.o show_card.o
 	$(CC) -o $@ $^ $(LIBS)
 
 .PHONY: release
