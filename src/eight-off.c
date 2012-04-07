@@ -16,21 +16,22 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int shuffle_fill(u_int64_t *fill, gsl_rng *r, int available_cards, int iter) {
+int shuffle_fill(u_int64_t *fill, gsl_rng *r, int available_cards) {
 
-  u_int64_t mask;
+  u_int64_t *swap_selection, *end_fill = fill + available_cards;
 
-  assert(fill!=NULL && r!=NULL && available_cards>0 && iter>0);
+  u_int64_t *base = fill;
 
-  assert(available_cards>=iter);
+  assert(fill!=NULL && r!=NULL && available_cards>0);
 
-  while(iter>0) {
+  while(fill < end_fill) {
 
-    mask = 1ULL << gsl_rng_uniform_int(r, available_cards);
-    *fill++ = mask;
+    swap_selection = base + gsl_rng_uniform_int(r, available_cards);
+
+    *fill++ = (swap_selection < fill) ? *swap_selection : 1ULL << (swap_selection - fill);
+    *swap_selection = 1ULL << (available_cards-1);
+
     available_cards--;
-
-    iter--;
 
   }
 
@@ -41,12 +42,6 @@ int shuffle_fill(u_int64_t *fill, gsl_rng *r, int available_cards, int iter) {
 int main(int argc, char *argv[]) {
 
   unsigned char outbuf[ sizeof(u_int64_t) * 54 ];
-
-  int len;
-
-  u_int64_t cmd;
-
-  struct timespec ts;
 
   int write_retval;
 
@@ -79,16 +74,16 @@ int main(int argc, char *argv[]) {
 
   *num++ = EIGHTOFF_CARDARRAY;
 
-  shuffle_fill(num, r, available_cards, 48);
-  available_cards -= 48;
+  shuffle_fill(num, r, available_cards);
+
+  num += 48;
+  num[4] = num[0];
 
   *num++ = EIGHTOFF_FREEBIN;
 
-  shuffle_fill(num, r, available_cards, 4);
-  available_cards -= 4;
-
   write_retval = write(1, outbuf, sizeof(outbuf));
   if (write_retval != sizeof(outbuf)) {
+    fprintf(stderr, "%s: Expected write of %ld but got %d.\n", __FUNCTION__, sizeof(outbuf), write_retval);
     return -1;
   }
 
