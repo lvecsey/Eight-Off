@@ -64,6 +64,7 @@ int show_card(u_int64_t entry) {
   case ace_spades: printf("Ace of spades.\n"); break;
   case joker1: printf("First joker.\n"); break;
   case joker2: printf("Second joker.\n"); break;
+  default: printf("%s: Read unknown card value %llu\n", __FUNCTION__, entry);
   }
 
   return 0;
