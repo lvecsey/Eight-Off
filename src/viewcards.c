@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -12,16 +13,19 @@
 
 int main(int argc, char *argv[]) {
 
+  ssize_t read_bytes;
+
   u_int64_t entry;
 
-  int num_reads;
+  u_int16_t num_reads;
 
-  ssize_t read_bytes;
+  int in_fd = (getenv("PROTO") != NULL) ? 6 : 0;
 
   num_reads = 1;
   
-  read_bytes = read(0, &entry, sizeof(u_int64_t));
+  read_bytes = read(in_fd, &entry, sizeof(u_int64_t));
   if (read_bytes != sizeof(u_int64_t)) {
+    printf("%s: Failed to read sizeof u_int64_t bytes.\n", __FUNCTION__);
     return -1;
   }
 
@@ -32,9 +36,9 @@ int main(int argc, char *argv[]) {
 
   for (num_reads = 48; num_reads > 0; num_reads--) {
 
-    read_bytes = read(0, &entry, sizeof(u_int64_t));
+    read_bytes = read(in_fd, &entry, sizeof(u_int64_t));
     if (read_bytes != sizeof(u_int64_t)) {
-      printf("%s: read returned read_bytes=%ld instead of %ld.\n", __FUNCTION__, read_bytes, sizeof(u_int64_t));
+      fprintf(stderr, "%s: read returned read_bytes=%ld instead of %ld.\n", __FUNCTION__, read_bytes, sizeof(u_int64_t));
       return -1;
     }
 
@@ -42,8 +46,9 @@ int main(int argc, char *argv[]) {
 
   }
 
-  read_bytes = read(0, &entry, sizeof(u_int64_t));
+  read_bytes = read(in_fd, &entry, sizeof(u_int64_t));
   if (read_bytes != sizeof(u_int64_t)) {
+    fprintf(stderr, "%s: read returned read_bytes=%ld instead of %ld.\n", __FUNCTION__, read_bytes, sizeof(u_int64_t));
     return -1;
   }
 
@@ -54,7 +59,7 @@ int main(int argc, char *argv[]) {
 
   for (num_reads = 4; num_reads > 0; num_reads--) {
 
-    read_bytes = read(0, &entry, sizeof(u_int64_t));
+    read_bytes = read(in_fd, &entry, sizeof(u_int64_t));
     if (read_bytes != sizeof(u_int64_t)) {
       printf("%s: read returned read_bytes=%ld instead of %ld.\n", __FUNCTION__, read_bytes, sizeof(u_int64_t));
       return -1;
